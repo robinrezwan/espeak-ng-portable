@@ -1,0 +1,10 @@
+{
+  "version": "1.52.0",
+  "sourceUrl": "https://github.com/espeak-ng/espeak-ng/archive/refs/tags/1.52.0.tar.gz",
+  "licenseBaseUrl": "https://raw.githubusercontent.com/espeak-ng/espeak-ng/1.52.0",
+  "licenseFiles": ["COPYING", "COPYING.APACHE", "COPYING.BSD2", "COPYING.UCD"],
+  "windows": {
+    "msiUrl": "https://github.com/espeak-ng/espeak-ng/releases/download/1.52.0/espeak-ng.msi",
+    "msiSha256": "7f673c709ea5dd579d3b5ebb98688cc575328a6ab7438d2bc405b88cedaeafb9"
+  }
+}
