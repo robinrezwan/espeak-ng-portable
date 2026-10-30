@@ -2,11 +2,11 @@
 
 # Build a portable macOS package of eSpeak NG from the upstream source.
 #
-# Downloads the upstream source, builds it unmodified for this machine's architecture, makes the
-# program find its library next to itself, and zips the program, its library, all of its language data,
-# and its license files into dist/espeak-ng-<version>-macos-<arch>.zip.
+# Downloads the upstream source, builds it unmodified for Apple silicon, makes the program find its
+# library next to itself, and zips the program, its library, all of its language data, and its license
+# files into dist/espeak-ng-<version>-macos-arm64.zip.
 #
-# Needs the Xcode Command Line Tools, CMake 3.23 or later, git, and jq.
+# Needs a Mac with Apple silicon, the Xcode Command Line Tools, CMake 3.23 or later, git, and jq.
 #
 # Usage: macos/package.sh [output-dir] [work-dir]
 
@@ -19,16 +19,12 @@ work_dir="${2:-$repo_root/work/macos}"
 # The oldest macOS version the package runs on.
 deployment_target='11.0'
 
-# Map this machine's architecture to the name used in the package file name.
-get_arch() {
-    case "$(uname -m)" in
-        arm64) echo 'arm64' ;;
-        x86_64) echo 'x64' ;;
-        *)
-            echo "Unsupported architecture: $(uname -m)" >&2
-            exit 1
-            ;;
-    esac
+# Stop unless this is a Mac with Apple silicon, the only architecture the package is built for.
+check_arch() {
+    if [[ "$(uname -m)" != 'arm64' ]]; then
+        echo "Unsupported architecture: $(uname -m). The package is built on Apple silicon (arm64) only." >&2
+        exit 1
+    fi
 }
 
 # Configure, build and install eSpeak NG from a source folder into an install folder.
@@ -122,7 +118,7 @@ check_dependencies() {
 
 # Write NOTICE.txt, which says what is in the package, where it came from, and under which licenses.
 write_notice() {
-    local config="$1" arch="$2" path="$3"
+    local config="$1" path="$2"
     local version source_url other_licenses
 
     version="$(jq -r .version "$config")"
@@ -130,7 +126,7 @@ write_notice() {
     other_licenses="$(jq -r '[.licenseFiles[] | select(. != "COPYING")] | join(", ")' "$config")"
 
     cat > "$path" <<EOF
-eSpeak NG $version for macOS ($arch)
+eSpeak NG $version for macOS (Apple silicon)
 
 This folder contains eSpeak NG $version, built from the unmodified upstream source so it runs from any
 folder without installation. It needs macOS $deployment_target or later.
@@ -176,10 +172,11 @@ test_package() {
 
 # Build --------------------------------------------------------------------------------------------
 
+check_arch
+
 config="$repo_root/espeak-ng.json"
 version="$(jq -r .version "$config")"
 source_url="$(jq -r .sourceUrl "$config")"
-arch="$(get_arch)"
 
 mkdir -p "$output_dir" "$work_dir"
 
@@ -216,11 +213,11 @@ while read -r file; do
     cp "$source_dir/$file" "$package_dir/"
 done < <(jq -r '.licenseFiles[]' "$config")
 
-write_notice "$config" "$arch" "$package_dir/NOTICE.txt"
+write_notice "$config" "$package_dir/NOTICE.txt"
 
 test_package "$package_dir" "$work_dir"
 
-zip_path="$output_dir/espeak-ng-$version-macos-$arch.zip"
+zip_path="$output_dir/espeak-ng-$version-macos-arm64.zip"
 
 rm -f "$zip_path"
 (cd "$work_dir" && zip -q -r -X "$zip_path" espeak-ng)

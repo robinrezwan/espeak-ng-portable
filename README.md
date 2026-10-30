@@ -9,9 +9,8 @@ installation. Each release packages one upstream eSpeak NG version, unmodified, 
 | --------------------------- | ------------------------------------- |
 | Windows x64                 | `espeak-ng-<version>-windows-x64.zip` |
 | macOS Apple silicon (arm64) | `espeak-ng-<version>-macos-arm64.zip` |
-| macOS Intel (x64)           | `espeak-ng-<version>-macos-x64.zip`   |
 
-The macOS packages need macOS 11 or later.
+The macOS package needs a Mac with Apple silicon and macOS 11 or later.
 
 Every release also contains `espeak-ng-<version>-source.tar.gz`, the exact upstream source for that
 version, and `SHA256SUMS.txt`.
@@ -39,8 +38,8 @@ espeak-ng/
 └── NOTICE.txt
 ```
 
-The macOS packages are built without audio playback. Write audio to a file with `-w <file.wav>`, or to stdout
-with `--stdout`. They are signed ad hoc, not notarized, so after unzipping a download from a browser, remove
+The macOS package is built without audio playback. Write audio to a file with `-w <file.wav>`, or to stdout
+with `--stdout`. It is signed ad hoc, not notarized, so after unzipping a download from a browser, remove
 the quarantine flag: `xattr -dr com.apple.quarantine espeak-ng`.
 
 ## Usage
@@ -76,7 +75,7 @@ workload:
 ./windows/package.ps1
 ```
 
-## How the macOS packages are built
+## How the macOS package is built
 
 eSpeak NG has no official macOS release, so `macos/package.sh` builds it from the upstream source,
 unmodified. See [`macos/README.md`](macos/README.md) for the details and how to build locally.
