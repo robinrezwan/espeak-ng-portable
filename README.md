@@ -5,10 +5,13 @@ installation. Each release packages one upstream eSpeak NG version, unmodified, 
 
 ## Downloads
 
-| Platform    | Release asset                         | Status            |
-| ----------- | ------------------------------------- | ----------------- |
-| Windows x64 | `espeak-ng-<version>-windows-x64.zip` | Available         |
-| macOS       | —                                     | Not yet available |
+| Platform                    | Release asset                         |
+| --------------------------- | ------------------------------------- |
+| Windows x64                 | `espeak-ng-<version>-windows-x64.zip` |
+| macOS Apple silicon (arm64) | `espeak-ng-<version>-macos-arm64.zip` |
+| macOS Intel (x64)           | `espeak-ng-<version>-macos-x64.zip`   |
+
+The macOS packages need macOS 11 or later.
 
 Every release also contains `espeak-ng-<version>-source.tar.gz`, the exact upstream source for that
 version, and `SHA256SUMS.txt`.
@@ -25,12 +28,31 @@ espeak-ng/
 └── NOTICE.txt
 ```
 
+## Package contents (macOS)
+
+```
+espeak-ng/
+├── espeak-ng
+├── libespeak-ng.dylib
+├── espeak-ng-data/                                      all languages
+├── COPYING, COPYING.APACHE, COPYING.BSD2, COPYING.UCD
+└── NOTICE.txt
+```
+
+The macOS packages are built without audio playback. Write audio to a file with `-w <file.wav>`, or to stdout
+with `--stdout`. They are signed ad hoc, not notarized, so after unzipping a download from a browser, remove
+the quarantine flag: `xattr -dr com.apple.quarantine espeak-ng`.
+
 ## Usage
 
 Always pass `--path`, so eSpeak NG uses the bundled data and never looks for an installed copy:
 
 ```
 espeak-ng.exe --path="C:\path\to\espeak-ng" -q --ipa -v en-us -b 1 -f input.txt
+```
+
+```
+./espeak-ng --path="/path/to/espeak-ng" -q --ipa -v en-us -b 1 -f input.txt
 ```
 
 On Windows, pass text through a UTF-8 file (`-b 1 -f <file>`). Text sent on stdin or as a command-line
@@ -54,13 +76,16 @@ workload:
 ./windows/package.ps1
 ```
 
-The macOS package is not built yet. See [`macos/README.md`](macos/README.md) for what it should produce.
+## How the macOS packages are built
+
+eSpeak NG has no official macOS release, so `macos/package.sh` builds it from the upstream source,
+unmodified. See [`macos/README.md`](macos/README.md) for the details and how to build locally.
 
 ## Releasing
 
 1. Update `espeak-ng.json` for the new eSpeak NG version: `version`, `sourceUrl`, `licenseBaseUrl`, the
    MSI URL, and its SHA-256 (`Get-FileHash espeak-ng.msi`).
-2. Push to `main`. The `Package` workflow builds and tests the package.
+2. Push to `main`. The `Package` workflow builds and tests every package.
 3. Push a tag `v<version>`, or `v<version>-<n>` to re-release the same eSpeak NG version with packaging
    fixes. The workflow publishes a GitHub release with every asset.
 
